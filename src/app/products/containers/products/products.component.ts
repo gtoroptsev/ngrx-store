@@ -1,40 +1,18 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { Pizza } from '../../models/pizza.model';
-import { PizzasService } from '../../services/pizzas.service';
+import * as fromStore from '../../store';
 
 @Component({
   selector: 'app-products',
+  templateUrl: './products.component.html',
   styleUrls: ['products.component.scss'],
-  template: `
-    <div class="products">
-      <div class="products__new">
-        <a
-          class="btn btn__ok"
-          routerLink="./new">
-          New Pizza
-        </a>
-      </div>
-      <div class="products__list">
-        <div *ngIf="!((pizzas)?.length)">
-          No pizzas, add one to get started.
-        </div>
-        <app-pizza-item
-          *ngFor="let pizza of (pizzas)"
-          [pizza]="pizza">
-        </app-pizza-item>
-      </div>
-    </div>
-  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProductsComponent implements OnInit {
-  pizzas: Pizza[];
+export class ProductsComponent {
 
-  constructor(private pizzaService: PizzasService) {}
+  pizzas$: Observable<Pizza[]> = this.store.select(fromStore.getAllPizzas);
 
-  ngOnInit() {
-    this.pizzaService.getPizzas().subscribe(pizzas => {
-      this.pizzas = pizzas;
-    });
-  }
+  constructor(private store: Store<fromStore.ProductsState>) {}
 }

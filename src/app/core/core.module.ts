@@ -7,16 +7,17 @@ import { StoreRouterConnectingModule } from '@ngrx/router-store';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { environment } from '../../environments/environment';
+import * as fromStore from './store';
 
 @NgModule({
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    StoreModule.forRoot({}, {}),
+    StoreModule.forRoot(fromStore.reducers),
     StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: environment.production }),
-    EffectsModule.forRoot([]),
-    StoreRouterConnectingModule.forRoot()
+    EffectsModule.forRoot(fromStore.effects),
+    StoreRouterConnectingModule.forRoot({ serializer: fromStore.CustomSerializer })
   ]
 })
 export class CoreModule {

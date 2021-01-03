@@ -1,91 +1,47 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { Pizza } from '../../models/pizza.model';
-import { PizzasService } from '../../services/pizzas.service';
-
 import { Topping } from '../../models/topping.model';
-import { ToppingsService } from '../../services/toppings.service';
+import * as fromStore from '../../store';
 
 @Component({
   selector: 'app-product-item',
+  templateUrl: './product-item.component.html',
   styleUrls: ['product-item.component.scss'],
-  template: `
-    <div
-      class="product-item">
-      <app-pizza-form
-        [pizza]="pizza"
-        [toppings]="toppings"
-        (selected)="onSelect($event)"
-        (create)="onCreate($event)"
-        (update)="onUpdate($event)"
-        (remove)="onRemove($event)">
-        <app-pizza-display
-          [pizza]="visualise">
-        </app-pizza-display>
-      </app-pizza-form>
-    </div>
-  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProductItemComponent implements OnInit {
-  pizza: Pizza;
-  visualise: Pizza;
-  toppings: Topping[];
+export class ProductItemComponent {
 
-  constructor(
-    private pizzaService: PizzasService,
-    private toppingsService: ToppingsService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) {}
+  toppings$: Observable<Topping[]> = this.store.select(fromStore.getAllToppings);
+  visualise$: Observable<Pizza> = this.store.select(fromStore.getPizzaVisualized);
+  pizza$: Observable<Pizza> = this.store.select(fromStore.getSelectedPizza).pipe(
+    tap((pizza: Pizza = null) => {
+      const pizzaExists = pizza && pizza.toppings && pizza.toppings.length;
+      const toppings = pizzaExists ? pizza.toppings.map(x => x.id) : [];
+      this.store.dispatch(fromStore.visualizeToppings({ payload: toppings }));
+    })
+  );
 
-  ngOnInit() {
-    this.pizzaService.getPizzas().subscribe(pizzas => {
-      const param = this.route.snapshot.params.pizzaId;
-      let pizza;
-      if (param === 'new') {
-        pizza = {};
-      } else {
-        pizza = pizzas.find(p => p.id === parseInt(param, 10));
-      }
-      this.pizza = pizza;
-      this.toppingsService.getToppings().subscribe(toppings => {
-        this.toppings = toppings;
-        this.onSelect(toppings.map(topping => topping.id));
-      });
-    });
-  }
+  constructor(private store: Store<fromStore.ProductsState>) {}
 
   onSelect(event: number[]) {
-    let toppings;
-    if (this.toppings && this.toppings.length) {
-      toppings = event.map(id =>
-        this.toppings.find(topping => topping.id === id)
-      );
-    } else {
-      toppings = this.pizza.toppings;
-    }
-    this.visualise = { ...this.pizza, toppings };
+    this.store.dispatch(fromStore.visualizeToppings({ payload: event }));
   }
 
   onCreate(event: Pizza) {
-    this.pizzaService.createPizza(event).subscribe(pizza => {
-      this.router.navigate([`/products/${pizza.id}`]);
-    });
+    this.store.dispatch(fromStore.createPizza({ payload: event }));
   }
 
   onUpdate(event: Pizza) {
-    this.pizzaService.updatePizza(event).subscribe(() => {
-      this.router.navigate([`/products`]);
-    });
+    this.store.dispatch(fromStore.updatePizza({ payload: event }));
   }
 
   onRemove(event: Pizza) {
     const remove = window.confirm('Are you sure?');
     if (remove) {
-      this.pizzaService.removePizza(event).subscribe(() => {
-        this.router.navigate([`/products`]);
-      });
+      this.store.dispatch(fromStore.removePizza({ payload: event }));
     }
   }
 }
