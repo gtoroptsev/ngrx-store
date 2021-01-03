@@ -12,13 +12,13 @@ export interface ToppingState extends EntityState<Topping> {
 
 const adapter: EntityAdapter<Topping> = createEntityAdapter<Topping>();
 
-const initialState: ToppingState = adapter.getInitialState({
+export const initialState: ToppingState = adapter.getInitialState({
   loading: false,
   loaded: false,
   selectedToppings: []
 });
 
-export const toppingsReducer = createReducer(
+export const reducer = createReducer(
   initialState,
   on(toppingActions.loadToppings, (state) => ({ ...state, loading: true })),
   on(toppingActions.loadToppingsFail, (state) => ({ ...state, ...{ loading: false, loaded: false } })),

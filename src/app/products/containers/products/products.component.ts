@@ -8,7 +8,7 @@ import * as fromStore from '../../store';
   selector: 'app-products',
   templateUrl: './products.component.html',
   styleUrls: ['products.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductsComponent {
 

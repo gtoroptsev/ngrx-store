@@ -11,8 +11,8 @@ export interface ProductsState {
 }
 
 export const reducers: ActionReducerMap<ProductsState> = {
-  pizzas: fromPizzas.pizzasReducer,
-  toppings: fromToppings.toppingsReducer,
+  pizzas: fromPizzas.reducer,
+  toppings: fromToppings.reducer,
 };
 
 export const getProductsState = createFeatureSelector<ProductsState>(FEATURE_NAME);

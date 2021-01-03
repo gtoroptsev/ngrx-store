@@ -11,12 +11,12 @@ export interface PizzaState extends EntityState<Pizza> {
 
 const adapter: EntityAdapter<Pizza> = createEntityAdapter<Pizza>();
 
-const initialState: PizzaState = adapter.getInitialState({
+export const initialState: PizzaState = adapter.getInitialState({
   loading: false,
   loaded: false
 });
 
-export const pizzasReducer = createReducer(
+export const reducer = createReducer(
   initialState,
   on(pizzaActions.loadPizzas, (state) => ({ ...state, loading: true })),
   on(pizzaActions.loadPizzasFail, (state) => ({ ...state, ...{ loading: false, loaded: false } })),
